@@ -10,4 +10,9 @@ public partial class EventType
     public string EventTypeName { get; set; } = null!;
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+
+    public override string ToString()
+    {
+        return EventTypeName;
+    }
 }

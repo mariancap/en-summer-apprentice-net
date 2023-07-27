@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TicketManagementSystemAPI.Exceptions;
 using TicketManagementSystemAPI.Models;
 
 namespace TicketManagementSystemAPI.Repositories
@@ -23,13 +24,22 @@ namespace TicketManagementSystemAPI.Repositories
 
         public IEnumerable<Event> GetAll()
         {
-            var events = _dbContext.Events.ToList();
+            var events = _dbContext.Events.Include(x=>x.EventType).Include(x=>x.Venue).ToList();
             return events;
         }
 
         public async Task<Event> GetById(int id)
         {
-            var @event =await _dbContext.Events.Where(e => e.EventId == id).FirstOrDefaultAsync();
+
+            var @event = await _dbContext.Events.Where(e => e.EventId == id)
+                .Include(e => e.EventType)
+                .Include(e => e.Venue)
+            .FirstOrDefaultAsync();
+
+            if (@event == null) {
+                throw new EntityNotFoundException(id,nameof(Event));
+            }
+            
             return @event;
         }
 

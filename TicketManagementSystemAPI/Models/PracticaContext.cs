@@ -15,6 +15,8 @@ public partial class PracticaContext : DbContext
     {
     }
 
+
+
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<Event> Events { get; set; }
@@ -30,9 +32,12 @@ public partial class PracticaContext : DbContext
     public virtual DbSet<Venue> Venues { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    { 
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-DRGC02L\\SQLEXPRESS;Initial Catalog=Practica;Integrated Security=True;TrustServerCertificate=True;encrypt=false;");
-
+    
+       
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Customer>(entity =>

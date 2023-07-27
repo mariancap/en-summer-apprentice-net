@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using TicketManagementSystemAPI.Exceptions;
 using TicketManagementSystemAPI.Models;
 using TicketManagementSystemAPI.Models.DTO;
 using TicketManagementSystemAPI.Repositories;
@@ -14,12 +17,14 @@ namespace TicketManagementSystemAPI.Controllers
     {
         private readonly IEventRepository _eventRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
        
 
-        public EventController(IEventRepository eventRepository,IMapper mapper)
+        public EventController(IEventRepository eventRepository,IMapper mapper,ILogger<EventController> logger)
         {
             _mapper=    mapper;
             _eventRepository = eventRepository;
+            _logger= logger;
         }
         [HttpGet]
         public ActionResult<List<EventDTO>> GetAll()
@@ -50,20 +55,23 @@ namespace TicketManagementSystemAPI.Controllers
 
         [HttpGet]
         public async  Task<ActionResult<EventDTO>> GetById(int id) {
-            var @event = await _eventRepository.GetById(id);
+           
 
-            //var dtoEvent = new EventDTO()
-            //{
-            //    EventID = @event.EventId,
-            //    EventName = @event.EventName ?? string.Empty,
-            //    EventDescription = @event.EventDescription ?? string.Empty,
-            //    EventType = @event.EventType?.EventTypeName ?? string.Empty,
-            //    Venue = @event.Venue?.EventLocation ?? string.Empty
-            //};
+                var @event = await _eventRepository.GetById(id);
 
-            var dtoEvent = _mapper.Map<EventDTO>(@event);
+                //var dtoEvent = new EventDTO()
+                //{
+                //    EventID = @event.EventId,
+                //    EventName = @event.EventName ?? string.Empty,
+                //    EventDescription = @event.EventDescription ?? string.Empty,
+                //    EventType = @event.EventType?.EventTypeName ?? string.Empty,
+                //    Venue = @event.Venue?.EventLocation ?? string.Empty
+                //};
 
-            return Ok(dtoEvent);
+                var dtoEvent = _mapper.Map<EventDTO>(@event);
+
+                return Ok(dtoEvent);
+            
         
         }
 
@@ -72,7 +80,10 @@ namespace TicketManagementSystemAPI.Controllers
         public async Task<ActionResult<EventPatchDTO>> Patch(EventPatchDTO eventPatch)
         {
             var eventEntity= await _eventRepository.GetById(eventPatch.EventId);
-            if(eventEntity == null) { return NotFound(); }
+            if (eventEntity == null)
+            {
+                throw new EntityNotFoundException(eventPatch.EventId, nameof(Event));
+            }
             _mapper.Map(eventPatch, eventEntity);
             _eventRepository.Update(eventEntity);
             return Ok(eventEntity);

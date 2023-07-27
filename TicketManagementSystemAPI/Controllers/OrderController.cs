@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using TicketManagementSystemAPI.Exceptions;
+using TicketManagementSystemAPI.Models;
 using TicketManagementSystemAPI.Models.DTO;
 using TicketManagementSystemAPI.Repositories;
 
@@ -11,11 +13,13 @@ namespace TicketManagementSystemAPI.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
+        private readonly CustomerRepository _customerRepository;
 
-        public OrderController(IOrderRepository OrderRepository,IMapper mapper)
+        public OrderController(IOrderRepository OrderRepository, IMapper mapper, CustomerRepository customerRepository)
         {
-            _mapper= mapper;
+            _mapper = mapper;
             _orderRepository = OrderRepository;
+            _customerRepository = customerRepository;
         }
         [HttpGet]
         public ActionResult<List<OrderDTO>> GetAll()
@@ -69,10 +73,7 @@ namespace TicketManagementSystemAPI.Controllers
         public async Task<ActionResult<OrderPatchDTO>> Patch(OrderPatchDTO orderPatch)
         {
             var orderEntity = await _orderRepository.GetById(orderPatch.orderID);
-            if(orderEntity == null)
-            {
-                return NotFound();
-            }
+         
             _mapper.Map(orderPatch, orderEntity);
             _orderRepository.Update(orderEntity);
             return Ok(orderEntity);        
@@ -82,10 +83,7 @@ namespace TicketManagementSystemAPI.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var orderEntity = await _orderRepository.GetById(id);
-            if (orderEntity == null)
-            {
-                return NotFound();
-            }
+            
 
             _orderRepository.delete(orderEntity);
             return NoContent();
