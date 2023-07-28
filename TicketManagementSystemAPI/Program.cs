@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Web;
+using TicketManagementSystemAPI.Models;
 using TicketManagementSystemAPI.Repositories;
 using TMS.Api.Middleware;
 
@@ -14,14 +16,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Insert dependency Injection for logger
-builder.Logging.ClearProviders();
-builder.Host.UseNLog();
+
+
+
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+ 
 
 
 builder.Services.AddTransient<IEventRepository, EventRepository>();
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<ITicketCategoryRepository, TicketCategoryRepository>();
+
+//Insert dependency Injection for logger
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 var app = builder.Build();
  

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using TicketManagementSystemAPI.Exceptions;
 using TicketManagementSystemAPI.Models;
 using TicketManagementSystemAPI.Models.DTO;
@@ -13,13 +15,13 @@ namespace TicketManagementSystemAPI.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
-        private readonly CustomerRepository _customerRepository;
+        private readonly ITicketCategoryRepository _ticketCategoryRepository;
 
-        public OrderController(IOrderRepository OrderRepository, IMapper mapper, CustomerRepository customerRepository)
+        public OrderController(IOrderRepository OrderRepository, IMapper mapper, ITicketCategoryRepository ticketCategoryRepository)
         {
             _mapper = mapper;
             _orderRepository = OrderRepository;
-            _customerRepository = customerRepository;
+            _ticketCategoryRepository= ticketCategoryRepository;
         }
         [HttpGet]
         public ActionResult<List<OrderDTO>> GetAll()
@@ -73,10 +75,26 @@ namespace TicketManagementSystemAPI.Controllers
         public async Task<ActionResult<OrderPatchDTO>> Patch(OrderPatchDTO orderPatch)
         {
             var orderEntity = await _orderRepository.GetById(orderPatch.orderID);
-         
+            var ticketcategoryEntity = await _ticketCategoryRepository.GetById(orderPatch.ticket_category_id);
+
+            orderEntity.TotalPrice = orderPatch.number_of_tickets * ticketcategoryEntity.Price;
+
+      
+            
             _mapper.Map(orderPatch, orderEntity);
             _orderRepository.Update(orderEntity);
-            return Ok(orderEntity);        
+
+            var orderResponse = _mapper.Map<OrderDTO>(orderEntity);
+
+            return new ContentResult()
+            {
+                Content = JsonSerializer.Serialize(orderResponse),
+                ContentType = "application/json",
+                StatusCode = StatusCodes.Status200OK
+            };
+
+
+                 
         }
 
         [HttpDelete]

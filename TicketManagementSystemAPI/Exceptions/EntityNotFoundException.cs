@@ -3,7 +3,7 @@
     public class EntityNotFoundException:Exception
     {
 
-          public EntityNotFoundException() { }
+          public EntityNotFoundException(long id) { }
           public EntityNotFoundException(string merrorMessage) : base(merrorMessage) { }
 
           public EntityNotFoundException(string merrorMessage,Exception innerException):base(merrorMessage, innerException) { }
